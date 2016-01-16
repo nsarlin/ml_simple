@@ -6,3 +6,37 @@ them.
 
 Thus, it does not claim to provide better performances, results or
 ease of use than any other existing implementation.
+
+Files:
+- Parser.py: Parser for idx file format, used for example in MNIST
+  dataset
+- LogisticReg.py: Implementation of logistic regression
+
+* Tests and example
+It is possible to try this library by testing it against the MNIST
+dataset:
+
+#+BEGIN_SRC python
+import Parser as p
+import LogisticReg as lr
+
+train_img = p.IdxParser("mnist/train-img").parse()
+train_lbl = p.IdxParser("mnist/train-lbl").parse()
+test_img = p.IdxParser("mnist/test-img").parse()
+test_lbl = p.IdxParser("mnist/test-lbl").parse() 
+xval_img = train_img[50000:].reshape((10000, 28*28))
+xval_lbl = train_lbl[50000:]
+train_img = train_img[:50000].reshape((50000, 28*28))
+train_lbl = train_lbl[:50000]
+
+Theta = lr.train_all(train_img, train_lbl, 10)
+
+acc = 0
+for (img, lbl) in zip(test_img, test_lbl):
+    if lr.evaluate(img) == lbl:
+        acc += 1
+print(acc/10000)
+#+END_SRC
+
+This evaluation code gave a success ration of 0.90 (Meaning that 9
+over 10 images in the test set were correctly guessed).
