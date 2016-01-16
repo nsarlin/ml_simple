@@ -21,7 +21,7 @@ dataset:
   import LogisticReg as lr
 
   # Loading datasets
-  # xval is the cross validation dataset. Eventhoug it is not used in
+  # xval is the cross validation dataset. Eventhough it is not used in
   # this code, it should be used for tuning the parameters of the
   # algorithm.
   train_img = p.IdxParser("mnist/train-img").parse()
@@ -33,7 +33,7 @@ dataset:
   train_img = train_img[:50000].reshape((50000, 28*28))
   train_lbl = train_lbl[:50000]
 
-  # Learning
+  # Learning, takes some time...
   Theta = lr.train_all(train_img, train_lbl, 10)
 
   # Testing against test set
