@@ -1,7 +1,7 @@
 * Presentation
 This library aims to provide many different models of machine learning
 algorithms (eg: logistic reg, SVM, neural networks...). The main goal
-for me is to better understand how those algorithms work by iplementing
+for me is to better understand how those algorithms work by implementing
 them. 
 
 Thus, it does not claim to provide better performances, results or
