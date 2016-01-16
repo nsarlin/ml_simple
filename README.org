@@ -44,5 +44,11 @@ dataset:
   print(acc/10000)
 #+END_SRC
 
-This evaluation code gave a success ration of 0.90 (Meaning that 9
-over 10 images in the test set were correctly guessed).
+This evaluation code gave a success ratio of 0.90 for logistic
+regression (Meaning that 9 over 10 images in the test set were
+correctly guessed).
+
+* Todo
+- Refactoring with classes for each training model
+- Improving performances with random batches learning
+- More models (linear regression, neural networks, SVM,...)
