@@ -10,6 +10,7 @@ ease of use than any other existing implementation.
 Files:
 - Parser.py: Parser for idx file format, used for example in MNIST
   dataset
+- Model.py: Generic base class for all learning models
 - LogisticReg.py: Implementation of logistic regression
 
 * Tests and example
