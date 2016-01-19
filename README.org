@@ -33,8 +33,10 @@ dataset:
   train_img = train_img[:50000].reshape((50000, 28*28))
   train_lbl = train_lbl[:50000]
 
+  # Creating a Logistic Regression model with default parameters
+  model = lr.LogisticReg()
   # Learning, takes some time...
-  Theta = lr.train_all(train_img, train_lbl, 10)
+  Theta = model.train(train_img, train_lbl, 10)
 
   # Testing against test set
   acc = 0
