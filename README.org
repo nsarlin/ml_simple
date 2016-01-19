@@ -27,6 +27,7 @@ dataset:
   train_img = p.IdxParser("mnist/train-img").parse()
   train_lbl = p.IdxParser("mnist/train-lbl").parse()
   test_img = p.IdxParser("mnist/test-img").parse()
+  test_img = test_img.reshape((10000, 28*28))
   test_lbl = p.IdxParser("mnist/test-lbl").parse() 
   xval_img = train_img[50000:].reshape((10000, 28*28))
   xval_lbl = train_lbl[50000:]
@@ -39,11 +40,7 @@ dataset:
   Theta = model.train(train_img, train_lbl, 10)
 
   # Testing against test set
-  acc = 0
-  for (img, lbl) in zip(test_img, test_lbl):
-      if lr.evaluate(img) == lbl:
-          acc += 1
-  print(acc/10000)
+  perf = model.evaluate(Theta, test_img, test_lbl)
 #+END_SRC
 
 This evaluation code gave a success ratio of 0.90 for logistic

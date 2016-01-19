@@ -7,7 +7,8 @@ class Model(object):
     def __init__(self, loop=False):
         """
         If loop is set, the model will prefer looping algorithm over
-        vectorized ones.
+        vectorized ones (not recommended for large datasets, but easier
+        to understand on small examples).
         """
         self.loop = loop
 
@@ -25,10 +26,10 @@ class Model(object):
         """
         raise NotImplementedError
 
-    def evaluate(self, Theta, x):
+    def predict(self, Theta, x):
         """
-        Estimates the probability for x to belong to each class.
-        Then, returns the class with the highest probability.
+        Tries to predict the correct class for input x,
+        using learned parameters set Theta.
         """
         classes = Theta.shape[0]
         best = 0
@@ -39,6 +40,18 @@ class Model(object):
                 best = tmp
                 res = c
         return res
+
+    def evaluate(self, Theta, X, y):
+        """
+        Gives an evaluation of how the model is performing by
+        comparing predictions and labels.
+        """
+        m = X.shape[0]
+        acc = 0
+        for (x, lbl) in zip(X, y):
+            if self.predict(Theta, x) == lbl:
+                acc += 1
+        return acc/m
 
     def cost_loop(self, theta, X, y):
         raise NotImplementedError
