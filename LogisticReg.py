@@ -1,18 +1,26 @@
 import numpy as np
 from Model import Model
-
-def sigmoid(z):
-    """
-    The sigmoid function is used to uniformally distribute values from
-    [-inf;+inf] to [0;1].
-    z can be a matrix, a vector or a scalar
-    """
-    return 1.0/(1.0+np.exp(-z))
+from Utils import *
 
 
 class LogisticReg(Model):
+    """
+    Logistic Regression is a simple classification algorithm,
+    based on sigmoid function and gradient descent.
+    """
     def __init__(self, alpha=None, num_iter=400, stop_gap=None,
                  loop=False):
+        """
+        @param alpha: Learning Rate. If alpha is big, the algorithm
+          will learn fast, but can diverge. If alpha is small, the
+          learning will be slow. If it is left unset, the method
+          find_alpha will be called to try to set it appropriatly.
+        @param num_iter: How many step of gradient descent should we
+          perform.
+        @param stop_gap: Instead of setting num_iter, we can decide to
+          stop learning when the cost reduces less than stop_gap
+          between two iterations.
+        """
         self.alpha = alpha
         self.num_iter = num_iter
         self.stop_gap = stop_gap
@@ -84,6 +92,13 @@ class LogisticReg(Model):
             return self.grad_vect(theta, X, y)
 
     def grad_descent(self, X, y, init_theta=None):
+        """
+        Tries to minimize the cost function. Each iteration will make
+        a small change in each component of theta, in order to make
+        the global cost decrease. The changes are applied using the
+        partial derivatives of the cost with respect to each component
+        of theta, and alpha, the learning rate.
+        """
         if self.num_iter is None and self.stop_gap is None:
             raise ValueError("You should either set num_iter or"
                              " stop_gap")
@@ -147,18 +162,4 @@ class LogisticReg(Model):
                 self.find_alpha(X, yc)
             Theta[c] = self.grad_descent(X, yc)
         return Theta
-
-
-def add_bias(X):
-    """
-    Adds either a vector of ones if X is a matrix, or a single one
-    if a is a vector.
-    """
-    # matrix
-    try:
-        return np.insert(X, 0, 1, axis=1)
-    # vector
-    except IndexError:
-        return np.insert(X, 0, 1)
-
 

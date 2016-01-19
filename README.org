@@ -8,10 +8,11 @@ Thus, it does not claim to provide better performances, results or
 ease of use than any other existing implementation.
 
 Files:
-- Parser.py: Parser for idx file format, used for example in MNIST
-  dataset
 - Model.py: Generic base class for all learning models
 - LogisticReg.py: Implementation of logistic regression
+- Utils.py: Small utilitaries functions
+- Parser.py: Parser for idx file format, used for example in MNIST
+  dataset
 
 * Tests and example
 It is possible to try this library by testing it against the MNIST
@@ -49,6 +50,6 @@ regression (Meaning that 9 over 10 images in the test set were
 correctly guessed).
 
 * Todo
-- Refactoring with classes for each training model
 - Improving performances with random batches learning
 - More models (linear regression, neural networks, SVM,...)
+
