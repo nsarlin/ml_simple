@@ -98,3 +98,38 @@ class IdxParser(object):
             raise ValueError("Wrong filetype")
 
         return self.parse_data()
+
+
+class CsvParser(object):
+    def __init__(self, filename, delim=','):
+        """Sets a parser up"""
+        self.file = open(filename, "r")
+        self.delim = delim
+        self.find_xshape()
+
+
+    def find_xshape(self):
+        line = self.file.readline()
+        self.xshape = line.count(self.delim) + 1
+        self.file.seek(0)
+
+
+    def parse_lines(self):
+        for line in self.file:
+            new_row = [float(x) for x in line.split(self.delim)]
+            if len(new_row) != self.xshape:
+                raise ValueError("Badly formated file")
+            yield new_row
+
+
+    def parse(self):
+        matrix = np.array([])
+        for row in self.parse_lines():
+            if matrix.shape == (0,):
+                matrix = np.insert(matrix, 0, row).reshape(self.xshape, 1)
+            else:
+                matrix = np.concatenate((matrix,
+                                         np.array(row).reshape(self.xshape, 1)),
+                                        1)
+        return matrix.transpose()
+        
