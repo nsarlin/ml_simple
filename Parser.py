@@ -109,12 +109,21 @@ class CsvParser(object):
 
 
     def find_xshape(self):
+        """
+        xshape is the number of elements in the first line of the csv file
+        We will use it to check that the size is consistent throughout the file.
+        yshape is simply the number of lines.
+        """
         line = self.file.readline()
         self.xshape = line.count(self.delim) + 1
         self.file.seek(0)
 
 
     def parse_lines(self):
+        """
+        Generator. Parse one line on each iteration, and check that its number
+        of elements is correct.
+        """
         for line in self.file:
             new_row = [float(x) for x in line.split(self.delim)]
             if len(new_row) != self.xshape:
@@ -123,6 +132,9 @@ class CsvParser(object):
 
 
     def parse(self):
+        """
+        parses the whole file an returns an array.
+        """
         matrix = np.array([])
         for row in self.parse_lines():
             if matrix.shape == (0,):
