@@ -33,31 +33,31 @@ class LogisticReg(Model):
         self.stop_gap = stop_gap
         super().__init__(loop)
 
-    def hypothesis(self, theta, x):
+    def hypothesis(self, coefs, x):
         """
         Here, the hypothesis answers to the question:
         Given our dataset x, what is the probability that x belongs
         to the right class ?
         """
-        return sigmoid(np.dot(theta.transpose(), x))
+        return sigmoid(np.dot(coefs.transpose(), x))
 
-    def cost_vect(self, theta, X, y):
+    def cost_vect(self, coefs, X, y):
         """
         Vectorized implementation of cost function.
         """
         m = X.shape[0]
-        ucost0 = np.dot(np.log(sigmoid(np.dot(X, theta))).transpose(), y)
+        ucost0 = np.dot(np.log(sigmoid(np.dot(X, coefs))).transpose(), y)
         a = np.log(np.ones((m,1)) -\
-                   sigmoid(np.dot(X, theta))).transpose()
+                   sigmoid(np.dot(X, coefs))).transpose()
         b = (np.ones((m,1))-y)
         ucost1 = np.dot(a, b)
         ucost = ucost0 + ucost1
         if self.regul != 0:
-            ucost -= self.regul/2 * sum(np.square(theta[1:]))
+            ucost -= self.regul/2 * sum(np.square(coefs[1:]))
 
         return -1.0/m*(ucost)
 
-    def cost_loop(self, theta, X, y):
+    def cost_loop(self, coefs, X, y):
         """
         With sigmoid, we cannot simply compute cost with difference
         between the hypothesis and the target, because target is
@@ -70,12 +70,12 @@ class LogisticReg(Model):
 
         for i in range(m):
             if y[i] == 1:
-                acc += -np.log(self.hypothesis(theta, X[i]))
+                acc += -np.log(self.hypothesis(coefs, X[i]))
             else:
-                acc += -np.log(1-self.hypothesis(theta, X[i]))
-        return acc/m + self.regul/(2*m) * sum(np.square(theta[1:]))
+                acc += -np.log(1-self.hypothesis(coefs, X[i]))
+        return acc/m + self.regul/(2*m) * np.sum(np.square(coefs[1:]))
 
-    def grad_vect(self, theta, X, y):
+    def grad_vect(self, coefs, X, y):
         """
         Computes one step of gradient descent using vectorized
         algorithm.
@@ -84,76 +84,76 @@ class LogisticReg(Model):
         m = X.shape[0]
         y = y.reshape((m, 1))
         if self.regul != 0:
-            n = theta.shape[0]
+            n = coefs.shape[0]
             multvec = np.insert(np.ones((n-1, 1))*self.regul/m, 0, 0).transpose()
             multvec = multvec.reshape((n, 1))
-            theta -= (self.rate/m)*np.dot(X.transpose(),
-                                          sigmoid(np.dot(X, theta)) - y) +\
-                      np.multiply(theta, multvec)
+            coefs -= (self.rate/m)*np.dot(X.transpose(),
+                                          sigmoid(np.dot(X, coefs)) - y) +\
+                      np.multiply(coefs, multvec)
         else:
-            theta -= (self.rate/m)*np.dot(X.transpose(),
-                                          sigmoid(np.dot(X, theta)) - y)
-        return theta
+            coefs -= (self.rate/m)*np.dot(X.transpose(),
+                                          sigmoid(np.dot(X, coefs)) - y)
+        return coefs
 
 
-    def grad_loop(self, theta, X, y):
+    def grad_loop(self, coefs, X, y):
         """
         Computes one step of gradient descent using looping algorithm.
         """
-        theta_copy = theta.copy()
-        n = theta.size
+        coefs_copy = coefs.copy()
+        n = coefs.size
         m = X.shape[0]
         for j in range(n):
             acc = 0
             for i in range(m):
-                acc += (self.hypothesis(theta_copy, X[i])-y[i])*X[i,j]
-            theta[j] = theta_copy[j] - self.rate*acc/m
+                acc += (self.hypothesis(coefs_copy, X[i])-y[i])*X[i,j]
+            coefs[j] = coefs_copy[j] - self.rate*acc/m
             if self.regul != 0 and j != 0:
-                theta[j] -= self.regul/m*theta_copy[j]
-        return theta
+                coefs[j] -= self.regul/m*coefs_copy[j]
+        return coefs
 
-    def grad(self, theta, X, y):
+    def grad(self, coefs, X, y):
         if self.loop:
-            return self.grad_loop(theta, X, y)
+            return self.grad_loop(coefs, X, y)
         else:
-            return self.grad_vect(theta, X, y)
+            return self.grad_vect(coefs, X, y)
 
-    def grad_descent(self, X, y, init_theta=None):
+    def grad_descent(self, X, y, init_coefs=None):
         """
         Tries to minimize the cost function. Each iteration will make
-        a small change in each component of theta, in order to make
+        a small change in each coeffcient, in order to make
         the global cost decrease. The changes are applied using the
-        partial derivatives of the cost with respect to each component
-        of theta, and rate, the learning rate.
+        partial derivatives of the cost with respect to each coefficient,
+        and rate, the learning rate.
         """
         if self.num_iter is None and self.stop_gap is None:
             raise ValueError("You should either set num_iter or"
                              " stop_gap")
-        if init_theta is None:
-            init_theta = np.zeros((X.shape[1], 1))
+        if init_coefs is None:
+            init_coefs = np.zeros((X.shape[1], 1))
 
-        theta = init_theta
+        coefs = init_coefs
 
         if self.num_iter:
             pc = 0
             print("{} %".format(pc), end="")
             for i in range(self.num_iter):
-                theta = self.grad(theta, X, y)
+                coefs = self.grad(coefs, X, y)
                 if int(100*i/self.num_iter) > pc:
                     pc = int(100*i/self.num_iter)
                     print("\r{} %".format(pc), end="")
             print()
         else:
-            last_cost = self.cost(theta, X, y)
+            last_cost = self.cost(coefs, X, y)
             while True:
-                theta = self.grad(theta, X, y)
-                cost = self.cost(theta, X, y)
+                coefs = self.grad(coefs, X, y)
+                cost = self.cost(coefs, X, y)
                 if abs(last_cost - cost) < self.stop_gap:
                     break
                 last_cost = cost
 
-        print("Cost: {}".format(self.cost(theta, X, y)))
-        return theta
+        print("Cost: {}".format(self.cost(coefs, X, y)))
+        return coefs
 
 
     def find_rate(self, X, y, init_rate = 0.01):
@@ -165,13 +165,13 @@ class LogisticReg(Model):
             return self.rate
         self.rate = init_rate
         good = False
-        theta = np.zeros((X.shape[1], 1))
+        coefs = np.zeros((X.shape[1], 1))
 
-        init_cost = self.cost(theta, X, y)
+        init_cost = self.cost(coefs, X, y)
         while True:
-            theta = np.zeros((X.shape[1] , 1))
-            theta = self.grad(theta, X, y)
-            cost = self.cost(theta, X, y)
+            coefs = np.zeros((X.shape[1] , 1))
+            coefs = self.grad(coefs, X, y)
+            cost = self.cost(coefs, X, y)
             if np.isnan(cost) or cost >= init_cost:
                 self.rate /= 3
                 if good:
@@ -193,16 +193,16 @@ class LogisticReg(Model):
         if nb_classes == 2:
             if self.rate is None:
                 self.find_rate(X, y)
-            Theta = self.grad_descent(X, y)
+            Coefs = self.grad_descent(X, y)
         elif nb_classes > 2:
-            Theta = np.zeros((nb_classes, n))
+            Coefs = np.zeros((nb_classes, n))
             for c in range(nb_classes):
                 print("Class {}".format(c))
                 yc = np.array([1 if val == c else 0 for val in y])
                 yc = yc.reshape((m, 1))
                 self.find_rate(X, yc)
-                Theta[c] = self.grad_descent(X, yc).reshape((n,))
+                Coefs[c] = self.grad_descent(X, yc).reshape((n,))
         else:
             raise ValueError("Number of classes should be >= 2")
-        return Theta
+        return Coefs
 

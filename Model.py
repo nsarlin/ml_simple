@@ -12,9 +12,9 @@ class Model(object):
         """
         self.loop = loop
 
-    def hypothesis(self, theta, x):
+    def hypothesis(self, coefs, x):
         """
-        Applies the model with parameters theta on x.
+        Applies the model with parameters coefs on x.
         """
         raise NotImplementedError
 
@@ -26,22 +26,22 @@ class Model(object):
         """
         raise NotImplementedError
 
-    def predict(self, Theta, x):
+    def predict(self, Coefs, x):
         """
         Tries to predict the correct class for input x,
-        using learned parameters set Theta.
+        using learned parameters set Coefs.
         """
-        classes = Theta.shape[0]
+        classes = Coefs.shape[0]
         best = 0
         res = 0
         for c in range(classes):
-            tmp = self.hypothesis(Theta[c], x)
+            tmp = self.hypothesis(Coefs[c], x)
             if tmp > best:
                 best = tmp
                 res = c
         return res
 
-    def evaluate(self, Theta, X, y):
+    def evaluate(self, Coefs, X, y):
         """
         Gives an evaluation of how the model is performing by
         comparing predictions and labels.
@@ -49,22 +49,22 @@ class Model(object):
         m = X.shape[0]
         acc = 0
         for (x, lbl) in zip(X, y):
-            if self.predict(Theta, x) == lbl:
+            if self.predict(Coefs, x) == lbl:
                 acc += 1
         return acc/m
 
-    def cost_loop(self, theta, X, y):
+    def cost_loop(self, coefs, X, y):
         raise NotImplementedError
 
-    def cost_vect(self, theta, X, y):
+    def cost_vect(self, coefs, X, y):
         raise NotImplementedError
     
-    def cost(self, theta, X, y):
+    def cost(self, coefs, X, y):
         """
-        Evaluates the cost of the parameters set theta on the
+        Evaluates the cost of the parameters set coefs on the
         training set.
         """
         if self.loop:
-            return self.cost_loop(theta, X, y)
+            return self.cost_loop(coefs, X, y)
         else:
-            return self.cost_vect(theta, X, y)
+            return self.cost_vect(coefs, X, y)
