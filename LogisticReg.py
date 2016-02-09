@@ -46,16 +46,14 @@ class LogisticReg(Model):
         Vectorized implementation of cost function.
         """
         m = X.shape[0]
-        ucost0 = np.dot(np.log(sigmoid(np.dot(X, coefs))).transpose(), y)
-        a = np.log(np.ones((m,1)) -\
-                   sigmoid(np.dot(X, coefs))).transpose()
-        b = (np.ones((m,1))-y)
-        ucost1 = np.dot(a, b)
-        ucost = ucost0 + ucost1
+
+        probs = sigmoid(np.dot(X, coefs))
+        ucost = -np.dot(np.log(probs).transpose(), y) +\
+                -np.dot(np.log(1 -probs).transpose(), 1-y)
         if self.regul != 0:
             ucost -= self.regul/2 * sum(np.square(coefs[1:]))
 
-        return -1.0/m*(ucost)
+        return ucost/m
 
     def cost_loop(self, coefs, X, y):
         """
@@ -191,8 +189,7 @@ class LogisticReg(Model):
         m, n = X.shape
 
         if nb_classes == 2:
-            if self.rate is None:
-                self.find_rate(X, y)
+            self.find_rate(X, y)
             Coefs = self.grad_descent(X, y)
         elif nb_classes > 2:
             Coefs = np.zeros((nb_classes, n))
