@@ -51,7 +51,7 @@ class LogisticReg(Model):
         ucost = -np.dot(np.log(probs).transpose(), y) +\
                 -np.dot(np.log(1 -probs).transpose(), 1-y)
         if self.regul != 0:
-            ucost -= self.regul/2 * sum(np.square(coefs[1:]))
+            ucost += self.regul/2 * sum(np.square(coefs[1:]))
 
         return ucost/m
 
