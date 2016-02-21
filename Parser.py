@@ -144,4 +144,3 @@ class CsvParser(object):
                                          np.array(row).reshape(self.xshape, 1)),
                                         1)
         return matrix.transpose()
-        

@@ -3,25 +3,6 @@ import numbers
 from Model import Model
 from Utils import *
 
-def label_to_bitvector(lbl, nb_classes):
-    """
-    Converts a lbl to a bitvector where the lblth element is 1 and the others 0
-    """
-    if isinstance(lbl, numbers.Real):
-        return np.array([1 if i == lbl else 0 for i in range(nb_classes)])
-    else:
-        raise TypeError
-
-def labels_to_bitmatrix(lbls, nb_classes):
-    """
-    Converts a vector of labels to a matrix made of bitvectors.
-    """
-    if isinstance(lbls, np.ndarray) and \
-       (len(lbls.shape) == 1 or lbls.shape[1] == 1):
-        return np.array([label_to_bitvector(lbl, nb_classes) for lbl in lbls])
-    else:
-        raise TypeError
-
 
 class NeuralNetwork(Model):
     """
@@ -97,7 +78,7 @@ class NeuralNetwork(Model):
         a = [x]
         z = []
         for cnt, coef in enumerate(Coefs):
-            z.append(sigmoid(np.dot(add_bias(a[cnt]), coef.transpose())))
+            z.append(sigmoid(np.dot(add_bias(a[cnt]), coef.T)))
             a.append(sigmoid(z[cnt]))
         return z, a
 
@@ -150,5 +131,59 @@ class NeuralNetwork(Model):
             for mat in coefs:
                 ucost += self.regul/2 * np.sum(np.square(mat[:, 1:]))
 
-
         return ucost/m
+
+
+    def backprop_loop(self, coefs, X, y):
+        """
+        The backpropagation algorithm computes the gradient of the cost function
+        of a Neural Network.
+        """
+        Deltas = []
+        m = X.shape[0]
+
+        Y = labels_to_bitmatrix(y, self.shape[-1])
+        for coef in coefs:
+            Deltas.append(np.zeros(coef.shape))
+
+        for t in range(m):
+            z, a = self.forward_prop(coefs, X[t])
+            for i, mat in enumerate(a[:-1]):
+                a[i] = add_bias(mat)
+
+            delta = a[-1] - Y[t, :]
+            for i, mat in reversed(list(enumerate(a[:-1]))):
+                Deltas[i] += np.dot(np.atleast_2d(delta).T, np.atleast_2d(mat))
+                delta = np.dot(coefs[i][:,1:].T,
+                               np.multiply(delta, sigmoid_grad(z[i])))
+
+        return [Delta/m for Delta in Deltas]
+
+
+    def backprop_vect(self, coefs, X, y):
+        """
+        Vectorized implementation of the backpropagation algorithm.
+        """
+        m = X.shape[0]
+        print(m)
+        Y = labels_to_bitmatrix(y, self.shape[-1])
+        z, a = self.forward_prop(coefs, X)
+        Deltas = []
+
+        last_act = a[-1]
+        a = [add_bias(mat) for mat in a[:-1]]
+        a.append(last_act)
+
+        delta = a[-1] - Y
+        for i, mat in reversed(list(enumerate(a[:-1]))):
+            print(i)
+            print(delta.shape)
+            Deltas.append(np.dot(np.atleast_2d(delta).T, np.atleast_2d(mat)))
+            delta = np.dot(np.multiply(delta, sigmoid_grad(z[i])),
+                           coefs[i][:,1:])
+
+        return [Delta/m for Delta in Deltas[::-1]]
+
+
+
+
