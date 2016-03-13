@@ -1,5 +1,6 @@
 import struct
 import numpy as np
+import scipy.io as sio
 
 class IdxParser(object):
     """
@@ -144,3 +145,27 @@ class CsvParser(object):
                                          np.array(row).reshape(self.xshape, 1)),
                                         1)
         return matrix.transpose()
+
+
+
+class MatParser(object):
+    """
+    Parser for matlab .mat files, using scipy.io.
+    This class is just a wrapper for scipy.io.loadmat.
+    """
+
+    def __init__(self, filename):
+        self.filename = filename
+        self.loaded = sio.loadmat(self.filename)
+
+        # Prints available matrices
+        print([key for key in self.loaded.keys() if
+               key.startswith('__') is False])
+
+
+    def parse(self, key):
+        """
+        .mat object can hold several matrices.
+        key is the name of the matrix we want to get.
+        """
+        return self.loaded[key]
