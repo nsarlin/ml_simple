@@ -1,5 +1,4 @@
 import numpy as np
-import numbers
 from Model import Model
 from Utils import *
 
@@ -78,7 +77,7 @@ class NeuralNetwork(Model):
         a = [x]
         z = []
         for cnt, coef in enumerate(Coefs):
-            z.append(sigmoid(np.dot(add_bias(a[cnt]), coef.T)))
+            z.append(np.dot(add_bias(a[cnt]), coef.T))
             a.append(sigmoid(z[cnt]))
         return z, a
 
@@ -125,8 +124,11 @@ class NeuralNetwork(Model):
 
         Y = labels_to_bitmatrix(y, self.shape[-1])
         probs = self.hypothesis(coefs, X)
-        ucost = np.sum(np.sum(np.multiply(-Y, np.log(probs)) -\
-                              np.multiply(1-Y, np.log(1-probs))))
+        temp = -Y * np.log(probs) -\
+               (np.ones(Y.shape)-Y) * np.log(np.ones(probs.shape)-probs)
+
+        ucost = temp.sum()
+
         if self.regul != 0:
             for mat in coefs:
                 ucost += self.regul/2 * np.sum(np.square(mat[:, 1:]))
@@ -165,7 +167,7 @@ class NeuralNetwork(Model):
         Vectorized implementation of the backpropagation algorithm.
         """
         m = X.shape[0]
-        print(m)
+
         Y = labels_to_bitmatrix(y, self.shape[-1])
         z, a = self.forward_prop(coefs, X)
         Deltas = []
@@ -176,14 +178,8 @@ class NeuralNetwork(Model):
 
         delta = a[-1] - Y
         for i, mat in reversed(list(enumerate(a[:-1]))):
-            print(i)
-            print(delta.shape)
             Deltas.append(np.dot(np.atleast_2d(delta).T, np.atleast_2d(mat)))
             delta = np.dot(np.multiply(delta, sigmoid_grad(z[i])),
                            coefs[i][:,1:])
 
         return [Delta/m for Delta in Deltas[::-1]]
-
-
-
-
